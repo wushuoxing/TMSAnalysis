@@ -1,0 +1,39 @@
+import numpy as np
+
+###########################################################################
+def TwoExpConv(x,A,mu,t1,t2):
+
+    # Convolution of two exponentials
+
+    mask = (x-mu)<0
+    y = A/(t1-t2)*( np.exp(-(x-mu)/t1) - np.exp(-(x-mu)/t2) )
+    y[mask] = np.zeros(len(y))[mask]
+    return y
+
+
+###########################################################################
+def GumbelDist(x,A,mu,beta):
+
+    # Gumbel distribution
+
+    scale_factor = 0.367879376 # so that if A = 1, the function peaks at 1.
+    return A/scale_factor * np.exp( -(x-mu)/beta - np.exp( -(x-mu)/beta ) )
+
+
+###########################################################################
+def DoubleExpGaussConv(x,A,B,mu,sig,t1,t2): 
+
+    # Convolution of a sum-of-two-exponentials and a gaussian.
+
+    x = x - mu
+    y = A * \
+        ( B/(2*t1)*np.exp(sig**2/(2*t1)) * np.exp(-x/t1) * \
+          (1 + erf( (x-sig**2/t1)/(sig*np.sqrt(2)) )) + \
+          (1-B)/(2*t2)*np.exp(sig**2/(2*t2)) * np.exp(-x/t2) * \
+          (1 + erf( (x-sig**2/t2)/(sig*np.sqrt(2)) )) \
+        )
+    return y
+
+###########################################################################
+def Gaussian( x, A, mu, sig ):
+    return A*np.exp(-(x-mu)**2/(2 * sig**2))
