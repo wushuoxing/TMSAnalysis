@@ -15,6 +15,9 @@ import numpy as np
 from scipy.fftpack import fft
 from numpy import mean, sqrt, square, arange
 
+import parse_psd_wfm
+import parse_nai_wfm
+
 import subprocess
 root_version = subprocess.check_output(['root-config --version'], shell=True)
 isROOT6 = False
@@ -23,14 +26,6 @@ if '6.1.0' in root_version or '6.04/06' in root_version:
     isROOT6 = True
 
 ROOT.gROOT.SetStyle("Plain")     
-ROOT.gStyle.SetOptStat(0)        
-ROOT.gStyle.SetPalette(1)        
-ROOT.gStyle.SetTitleStyle(0)     
-ROOT.gStyle.SetTitleBorderSize(0)       
-ROOT.gStyle.SetPadLeftMargin(0.13);
-ROOT.gStyle.SetPadBottomMargin(0.1);
-ROOT.gStyle.SetPadTopMargin(0.1);
-ROOT.gStyle.SetPadRightMargin(0.13);
     
 gROOT.ProcessLine('.L tms_utilities/fitShaped.C+')
 
@@ -99,6 +94,8 @@ def ProcessFile( filename, num_events = -1):
     if num_records_to_process > n_entries or num_events < 0:
        num_records_to_process = n_entries
 
+    output_dataframe = pd.DataFrame()
+
     i_entry = 0
     i_event = 0
     while i_event < num_events:
@@ -114,10 +111,12 @@ def ProcessFile( filename, num_events = -1):
             time_err_y_array = []
  
         #tree.GetEntry(i_entry)
-          
+        output_series = pd.Series()
+ 
         for i_channel in xrange(num_channels):
             tree.GetEntry(i_entry)
 
+            slot_num = tree.HitTree.GetSlot()
             ch_num =  tree.HitTree.GetChannel()
             gate_size = tree.HitTree.GetGateCount()
 
@@ -134,71 +133,30 @@ def ProcessFile( filename, num_events = -1):
             graph = tree.HitTree.GetGraph()
             channel_wfm = np.array([graph.GetY()[isamp] for isamp in xrange(graph.GetN())])
             if channel_type_map[ch_num] == 'PSD':
-               
+               psd_reduced_data = parse_psd_wfm.ParsePSDWfm( channel_wfm, save_waveform=True )
+            else:
+               # For now, do nothing here.
+               continue
 
+            for colname in psd_reduced_data:                
+                output_series[colname] = psd_reduced_data[colname]
  
             i_entry += 1
 
+        output_dataframe = output_dataframe.append( output_series, ignore_index=True )
         i_event += 1   
  
-    basename = os.path.basename(filename)
-    basename = os.path.splitext(basename)[0]
-    basename = basename.split("_")[2]
-    outfilename = "./outfiles/out_new_5kV_%s.root" % basename
+    #basename = os.path.basename(filename)
+    #basename = os.path.splitext(basename)[0]
+    #basename = basename.split("_")[2]
+    #outfilename = "./outfiles/out_new_5kV_%s.root" % basename
     #outfilename = "./outfiles/out_new_%s.root" % basename
 
-    outfile=ROOT.TFile(outfilename,"RECREATE")
-    h_chi2_ind.Write()
-    h_chi2_col.Write()
-    h_chi2_ind_wfm.Write()
-    h_chi2_col_wfm.Write()
-    h_amp.Write()
-    h_amp_nocorr.Write()
-    h_dx.Write()
-    p_dQdx.Write()
-    p_dQdx_dt.Write()
-    h_time_x.Write()
-    h_z_x.Write()
-    mg_col.Write()
-    mg_ind.Write()
-    mg_xvsy.Write()
-    #time.sleep(40)
-    h_tau1.Write()
-    h_tau2.Write()
-    h_tau3.Write()
-    h_tau4.Write()
-    h_ratio1.Write()
-    h_ratio2.Write()
-    h_dqdx_dt.Write()
-    h_hit_col.Write()
-    h_hit_ind.Write()
-    h_theta.Write()
-    h_phi.Write()
-    outfile.Write()
-    '''
-    c4.cd()
-    h_chi2_ind.Draw()
-    c5.cd()
-    h_chi2_col.Draw()
-    c6.cd()
-    h_amp.Draw()
-    c2.cd()
-    h_dx.Draw()
-    c10.cd()
-    p_dQdx.Draw()
- 
-    c2.Print("dx.pdf")
-    c4.Print("chi2_ind.pdf")
-    c5.Print("chi2_col.pdf")
-    c6.Print("amplitude.pdf")
-    c10.Print("dQdx_z.pdf")
-    '''
-    #c4.Update()
-        #if i_entry > 2: break # debugging
+    #outfile=ROOT.TFile(outfilename,"RECREATE")
 
-    #legend.Draw()
-    #canvas.Update()
-    #canvas.Print("%s_spectrum.png" % basename)
+    output_dataframe.to_csv('psd_output_test.csv')
+    return output_dataframe
+
 
 if __name__ == "__main__":
 
