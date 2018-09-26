@@ -7,10 +7,6 @@ from tms_utilities.useful_function_shapes import GumbelDist
 ########################################################################################
 def ParsePSDWfm( raw_waveform, save_waveform=False ):
  
-  start_time = time.time()  
-
-  f = open(filename,'r')
-
   isNewEvent = True  
 
   colnames = [\
@@ -35,9 +31,9 @@ def ParsePSDWfm( raw_waveform, save_waveform=False ):
   if save_waveform:
      reduced_data['Data'] = raw_waveform
 
-  reduced_data['Baseline'], reduced_data['Baseline RMS'] = GetBaseline( waveform )    
+  reduced_data['Baseline'], reduced_data['Baseline RMS'] = GetBaseline( raw_waveform )    
 
-  reduced_data.name = reduced_data['PSD Event']
+  reduced_data.name = 'PSD Event'
 
   reduced_data['Pulse Height'],\
   reduced_data['Pulse Area'],\
@@ -47,7 +43,7 @@ def ParsePSDWfm( raw_waveform, save_waveform=False ):
   reduced_data['PSD8'],\
   reduced_data['PSD9'],\
   reduced_data['PSD10'],\
-  reduced_data['PSD11'] = FindPulseAndComputeArea( waveform )
+  reduced_data['PSD11'] = FindPulseAndComputeArea( raw_waveform )
 
   return reduced_data
     

@@ -72,6 +72,7 @@ def ProcessFile( filename, num_events = -1):
 
     channel_type_map = GetChannelTypeMap()
     num_channels = len(channel_type_map)
+    #print('Num channels: {}'.format(num_channels))
 
     basename = os.path.basename(filename)
     basename = os.path.splitext(basename)[0]
@@ -80,7 +81,7 @@ def ProcessFile( filename, num_events = -1):
     root_file = ROOT.TFile(filename)
     tree = root_file.Get("HitTree")
     n_entries = tree.GetEntries()
-    print('{} entries in HitTree'.format(n_entries))
+    #print('{} entries in HitTree'.format(n_entries))
 
 
     # Figure out how many records to process to get the right
@@ -115,11 +116,11 @@ def ProcessFile( filename, num_events = -1):
             ch_num =  tree.HitTree.GetChannel()
             gate_size = tree.HitTree.GetGateCount()
 
-            print('entry {}, channel {}'.format(i_entry, channel))
+            #print('entry {}, channel {}'.format(i_entry, ch_num))
 
             # Channel 6 is noisy, so we ignore it for now. 
             # (May have been destroyed by a discharge or something)
-            if channel==6:
+            if ch_num==6:
                 i_entry = i_entry+1
                 continue
 
@@ -131,9 +132,12 @@ def ProcessFile( filename, num_events = -1):
                psd_reduced_data = parse_psd_wfm.ParsePSDWfm( channel_wfm, save_waveform=True )
             else:
                # For now, do nothing here.
+               i_entry += 1
                continue
 
-            for colname in psd_reduced_data:                
+            #print(psd_reduced_data)
+
+            for colname in psd_reduced_data.index:
                 output_series[colname] = psd_reduced_data[colname]
  
             i_entry += 1
@@ -149,7 +153,7 @@ def ProcessFile( filename, num_events = -1):
 
     #outfile=ROOT.TFile(outfilename,"RECREATE")
 
-    output_dataframe.to_csv('psd_output_test.csv')
+    output_dataframe.to_pickle('psd_output_test.pkl')
     return output_dataframe
 
 
