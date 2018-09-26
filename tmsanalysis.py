@@ -18,6 +18,7 @@ from numpy import mean, sqrt, square, arange
 
 import parse_psd_wfm
 import parse_nai_wfm
+import parse_tms_wfm
 
 import subprocess
 root_version = subprocess.check_output(['root-config --version'], shell=True)
@@ -66,7 +67,7 @@ def GetChannelTypeMap():
   return channel_type_map
 
 ########################################################################
-def ProcessFile( filename, num_events = -1):
+def ProcessFile( filename, num_events = -1, save_waveforms = False):
 
     #print "processing file: ", filename
 
@@ -129,7 +130,9 @@ def ProcessFile( filename, num_events = -1):
             graph = tree.HitTree.GetGraph()
             channel_wfm = np.array([graph.GetY()[isamp] for isamp in xrange(graph.GetN())])
             if channel_type_map[ch_num] == 'PSD':
-               psd_reduced_data = parse_psd_wfm.ParsePSDWfm( channel_wfm, save_waveform=True )
+               psd_reduced_data = parse_psd_wfm.ParsePSDWfm( channel_wfm, save_waveform=save_waveforms )
+            if channel_type_map[ch_num] == 'Xwire' and ch_num == 3:
+               xwire_reduced_data = parse_tms_wfm.ParseTMSXwireWfm( channel_wfm, ch_num, save_waveform=save_waveforms )
             else:
                # For now, do nothing here.
                i_entry += 1
@@ -139,7 +142,9 @@ def ProcessFile( filename, num_events = -1):
 
             for colname in psd_reduced_data.index:
                 output_series[colname] = psd_reduced_data[colname]
- 
+            for colname in xwire_reduced_data.index:
+                output_series[colname] = xwire_reduced_data[colname]
+
             i_entry += 1
 
         output_dataframe = output_dataframe.append( output_series, ignore_index=True )
