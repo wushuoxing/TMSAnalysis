@@ -37,3 +37,12 @@ def DoubleExpGaussConv(x,A,B,mu,sig,t1,t2):
 ###########################################################################
 def Gaussian( x, A, mu, sig ):
     return A*np.exp(-(x-mu)**2/(2 * sig**2))
+
+
+###########################################################################
+def fitShaped( x, p0, p1, p2, p3, p4 ):
+    fenzi = np.exp( -(x-p1)/p2 ) - np.exp( -(x-p1)/p3 )
+    fenmu = p2/(p2-p3)
+    result = p0 * fenzi/fenmu + p4
+    result[x<p1] = np.ones(len(result[x<p1]))*p4
+    return result

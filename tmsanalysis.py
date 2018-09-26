@@ -12,6 +12,7 @@ from tms_utilities.digi_filter import digi_hp
 from tms_utilities.digi_filter import digi_lp
 
 import numpy as np
+import pandas as pd
 from scipy.fftpack import fft
 from numpy import mean, sqrt, square, arange
 
@@ -22,15 +23,9 @@ import subprocess
 root_version = subprocess.check_output(['root-config --version'], shell=True)
 isROOT6 = False
 if '6.1.0' in root_version or '6.04/06' in root_version:
-    print "Found ROOT 6"
+    print("Found ROOT 6")
     isROOT6 = True
 
-ROOT.gROOT.SetStyle("Plain")     
-    
-gROOT.ProcessLine('.L tms_utilities/fitShaped.C+')
-
-#from ROOT import fitRising
-from ROOT import fitShaped
 
 def print_fit_info(fit_result, fit_duration):
         
@@ -85,7 +80,7 @@ def ProcessFile( filename, num_events = -1):
     root_file = ROOT.TFile(filename)
     tree = root_file.Get("HitTree")
     n_entries = tree.GetEntries()
-    print "%i entries in HitTree" % n_entries
+    print('{} entries in HitTree'.format(n_entries))
 
 
     # Figure out how many records to process to get the right
@@ -120,7 +115,7 @@ def ProcessFile( filename, num_events = -1):
             ch_num =  tree.HitTree.GetChannel()
             gate_size = tree.HitTree.GetGateCount()
 
-            print "entry %i, channel %i" % (i_entry, channel)
+            print('entry {}, channel {}'.format(i_entry, channel))
 
             # Channel 6 is noisy, so we ignore it for now. 
             # (May have been destroyed by a discharge or something)
@@ -161,7 +156,7 @@ def ProcessFile( filename, num_events = -1):
 if __name__ == "__main__":
 
     if len(sys.argv) < 2:
-        print "arguments: [sis root files]"
+        print('arguments: [sis root files]')
         sys.exit(1)
 
     for filename in sys.argv[1:]:
