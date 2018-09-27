@@ -2,39 +2,15 @@ import os
 import sys
 import time
 import ROOT
-from ROOT import TF1
-from ROOT import gROOT
-from ROOT import *
 
 from tms_utilities.digi_filter import digi_hp
 from tms_utilities.digi_filter import digi_lp
 from tms_utilities.useful_function_shapes import fitShapedConst
 
 import numpy as np
-from scipy.fftpack import fft
 import scipy.optimize as opt
-from numpy import mean, sqrt, square, arange
 import pandas as pd
-from iminuit import Minuit
 
-
-#gROOT.ProcessLine('.L fitShaped.C+')
-
-#from ROOT import fitShaped
-
-#def print_fit_info(fit_result, fit_duration):
-#        
-#    chi2 = fit_result.Chi2()
-#    prob = fit_result.Prob()
-#    ndf = fit_result.Ndf()
-#    status = fit_result.Status()
-#    #print "fit results:"
-#    #print "\tchi2: %.2f" % chi2
-#    #print "\tn dof", ndf
-#    #print "\tchi2 / dof: %.2f" % (chi2/ndf)
-#    #print "\tprob", prob
-#    #print "\tstatus", status
-#    #print "\t%.1f seconds" % fit_duration
 
 def ParseTMSXwireWfm( raw_waveform, ch_num, save_waveform = False ):
 
@@ -67,23 +43,9 @@ def ParseTMSXwireWfm( raw_waveform, ch_num, save_waveform = False ):
     fit_init_list = list()
     fit_init_list.append( 1. )             # integral
     fit_init_list.append( float(2000.0) )  # starting time
-#    fit_init_list.append( float(125.*1) )  # differential time
-#    fit_init_list.append( float(31.25*2))  # integration time
+    #fit_init_list.append( float(125.*1) )  # differential time
+    #fit_init_list.append( float(31.25*2))  # integration time
     fit_init_list.append( noise_baseline)  # noise floor
-
-
-#    fitFunc = TF1("fitShapedTT",fitShaped, 1500, 3500, 5)
-
-#    fitFunc.SetParName(0, "integral")
-#    fitFunc.SetParName(1, "starting time")
-#    fitFunc.SetParName(2, "differential time")
-#    fitFunc.SetParName(3, "integration time")
-#    fitFunc.SetParName(4, "noise floor")
-
-#    fitFunc.SetParameter(1, float(2000.0))
-#    fitFunc.SetParameter(2, float(125.0*1))
-#    fitFunc.SetParameter(3, float(31.25*2))
-#    fitFunc.SetParameter(4, noise_baseline)
 
     if (signal_amp-noise_baseline)>4*noise_rms and (np.argmax(signal_wfm)+2000)>2000 :
 
