@@ -46,3 +46,13 @@ def fitShaped( x, p0, p1, p2, p3, p4 ):
     result = p0 * fenzi/fenmu + p4
     result[x<p1] = np.ones(len(result[x<p1]))*p4
     return result
+
+###########################################################################
+def fitShapedConst( x, p0, p1, p4 ):
+    p2 = 125.
+    p3 = 62.5
+    fenzi = np.exp( -(x-p1)/p2 ) - np.exp( -(x-p1)/p3 )
+    fenmu = p2/(p2-p3)
+    result = p0 * fenzi/fenmu + p4
+    result[x<p1] = np.ones(len(result[x<p1]))*p4
+    return result
