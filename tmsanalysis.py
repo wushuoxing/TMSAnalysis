@@ -136,9 +136,12 @@ def ProcessFile( filename, num_events = -1, save_waveforms = False):
                   output_series[colname] = psd_reduced_data[colname]
 
             if channel_type_map[ch_num] == 'Xwire':
-               xwire_reduced_data = parse_tms_wfm.ParseTMSXwireWfm( channel_wfm, ch_num, save_waveform=save_waveforms )
+               xwire_reduced_data = parse_tms_wfm.ParseTMSXwireWfm( channel_wfm, save_waveform = save_waveforms )
                for colname in xwire_reduced_data.index:
                  output_series[colname] = xwire_reduced_data[colname]
+
+            if channel_type_map[ch_num] == 'Ywire':
+               ywire_reduced_data = parse_tms_wfm.ParseTMSYwireWfm( channel_wfm, save_waveform = save_waveforms )
 
             else:
                # For now, do nothing here.

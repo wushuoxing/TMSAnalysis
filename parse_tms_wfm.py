@@ -12,9 +12,8 @@ import scipy.optimize as opt
 import pandas as pd
 
 ######################################################################################
-def ParseTMSXwireWfm( raw_waveform, ch_num, save_waveform = False ):
+def ParseTMSXwireWfm( raw_waveform, save_waveform = False ):
 
-    print('Parsing channel {}'.format(ch_num))
 
     output_series = pd.Series()
 
@@ -117,9 +116,7 @@ def ParseTMSXwireWfm( raw_waveform, ch_num, save_waveform = False ):
     return output_series
 
 ######################################################################################
-def ParseTMSYwireWfm( raw_waveform, ch_num, save_waveform=False ):
-
-    print('Parsing channel {}'.format(ch_num))
+def ParseTMSYwireWfm( raw_waveform, save_waveform=False ):
 
     output_series = pd.Series()
 
