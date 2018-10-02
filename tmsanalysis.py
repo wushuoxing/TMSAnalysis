@@ -27,6 +27,7 @@ if '6.1.0' in root_version or '6.04/06' in root_version:
     print("Found ROOT 6")
     isROOT6 = True
 
+whichDetector = raw_input('Which detector? 1 for PSD, 2 for wire array, 3 for NaI')
 
 def print_fit_info(fit_result, fit_duration):
         
@@ -65,13 +66,34 @@ def GetChannelTypeMap():
   channel_type_map[15] = 'Ywire'
 
   return channel_type_map
+########################################################################
+def GetChannelTypeMapPSD():
+  num_channels = 16
+  channel_type_map = ['empty' for i in range(0,num_channels)]
 
+  channel_type_map[0] = 'PSD'
+
+  return channel_type_map
+########################################################################
+def GetChannelTypeMapNaI():
+  num_channels = 16 
+  channel_type_map = ['empty' for i in range(0,num_channels)]
+
+  channel_type_map[0] = 'NaI'
+
+  return channel_type_map
 ########################################################################
 def ProcessFile( filename, num_events = -1, save_waveforms = False):
 
     #print "processing file: ", filename
+    if whichDetector == '1':
+      channel_type_map = GetChannelTypeMapPSD()
+    if whichDetector == '2':
+      channel_type_map = GetChannelTypeMap()
+    if whichDetector == '3':
+      channel_type_map = GetChannelTypeMapNaI()
 
-    channel_type_map = GetChannelTypeMap()
+    #channel_type_map = GetChannelTypeMap()
     num_channels = len(channel_type_map)
     #print('Num channels: {}'.format(num_channels))
 
@@ -97,8 +119,8 @@ def ProcessFile( filename, num_events = -1, save_waveforms = False):
     i_event = 0
     while i_event < num_events:
     #for i_entry in xrange(n_entries):
+        print('Processing event {}'.format(i_event))
         if( i_entry % num_channels == 0 ):
-
             ch_x_array = []
             energy_x_array = []
             time_x_array = []
@@ -130,18 +152,30 @@ def ProcessFile( filename, num_events = -1, save_waveforms = False):
             graph = tree.HitTree.GetGraph()
             channel_wfm = np.array([graph.GetY()[isamp] for isamp in xrange(graph.GetN())])
 
+            #print('Processing channel: {}'.format(ch_num))
             if channel_type_map[ch_num] == 'PSD':
                psd_reduced_data = parse_psd_wfm.ParsePSDWfm( channel_wfm, save_waveform=save_waveforms )
                for colname in psd_reduced_data.index:
-                  output_series[colname] = psd_reduced_data[colname]
+                  new_colname = 'PSD ' + colname
+                  output_series[new_colname] = psd_reduced_data[colname]
 
             if channel_type_map[ch_num] == 'Xwire':
                xwire_reduced_data = parse_tms_wfm.ParseTMSXwireWfm( channel_wfm, save_waveform = save_waveforms )
                for colname in xwire_reduced_data.index:
-                 output_series[colname] = xwire_reduced_data[colname]
+                 new_colname = 'X{} '.format(ch_num) + colname
+                 output_series[new_colname] = xwire_reduced_data[colname]
 
             if channel_type_map[ch_num] == 'Ywire':
                ywire_reduced_data = parse_tms_wfm.ParseTMSYwireWfm( channel_wfm, save_waveform = save_waveforms )
+               for colname in ywire_reduced_data.index:
+                 new_colname = 'Y{} '.format(ch_num) + colname
+                 output_series[new_colname] = ywire_reduced_data[colname]
+            
+            if channel_type_map[ch_num] == 'NaI':
+               nai_reduced_data = parse_nai_wfm.ParseNaIWfm( channel_wfm, save_waveform = save_waveforms )
+               for colname in nai_reduced_data.index:
+                 new_colname = 'NaI ' + colname
+                 output_series[new_colname] = nai_reduced_data[colname]
 
             else:
                # For now, do nothing here.
@@ -155,6 +189,8 @@ def ProcessFile( filename, num_events = -1, save_waveforms = False):
 
         output_dataframe = output_dataframe.append( output_series, ignore_index=True )
         i_event += 1   
+        if i_entry >= num_records_to_process:
+           break
  
     #basename = os.path.basename(filename)
     #basename = os.path.splitext(basename)[0]
@@ -164,7 +200,7 @@ def ProcessFile( filename, num_events = -1, save_waveforms = False):
 
     #outfile=ROOT.TFile(outfilename,"RECREATE")
 
-    output_dataframe.to_pickle('psd_output_test.pkl')
+    output_dataframe.to_pickle('tms_nai_output_test.pkl')
     return output_dataframe
 
 

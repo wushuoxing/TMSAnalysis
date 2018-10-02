@@ -52,9 +52,9 @@ def ParseTMSXwireWfm( raw_waveform, save_waveform = False ):
 
          fit_init_list[0] = np.max(signal_wfm)*8.
          fit_init = tuple( fit_init_list )
-         print('Init: [{},{},{}]'.format(fit_init_list[0],\
-                                         fit_init_list[1],\
-                                         fit_init_list[2]))
+         #print('Init: [{},{},{}]'.format(fit_init_list[0],\
+         #                                fit_init_list[1],\
+         #                                fit_init_list[2]))
 
          fit_start = 1600#np.argmax(signal_wfm)+2000-150
          fit_end   = 4000#np.argmax(signal_wfm)+2000+400
@@ -75,7 +75,7 @@ def ParseTMSXwireWfm( raw_waveform, save_waveform = False ):
            print(e)
            popt = np.zeros(len(fit_init))
            pcov = np.zeros(len(fit_init))
-         print('Fit: [{},{},{}]'.format(popt[0],popt[1],popt[2]))
+         #print('Fit: [{},{},{}]'.format(popt[0],popt[1],popt[2]))
 #         print('Popt {}'.format(popt))
 #         print('Pcov {}'.format(pcov))
 #         print('pcov.shape {}'.format(pcov.shape))
@@ -155,9 +155,9 @@ def ParseTMSYwireWfm( raw_waveform, save_waveform=False ):
 
          fit_init_list[0] = np.min(signal_wfm)*8.
          fit_init = tuple( fit_init_list )
-         print('Init: [{},{},{}]'.format(fit_init_list[0],\
-                                         fit_init_list[1],\
-                                         fit_init_list[2]))
+         #print('Init: [{},{},{}]'.format(fit_init_list[0],\
+         #                                fit_init_list[1],\
+         #                                fit_init_list[2]))
 
          fit_start = 1600#np.argmax(signal_wfm)+2000-150
          fit_end   = 4000#np.argmax(signal_wfm)+2000+400
@@ -178,7 +178,7 @@ def ParseTMSYwireWfm( raw_waveform, save_waveform=False ):
            print(e)
            popt = np.zeros(len(fit_init))
            pcov = np.zeros(len(fit_init))
-         print('Fit: [{},{},{}]'.format(popt[0],popt[1],popt[2]))
+         #print('Fit: [{},{},{}]'.format(popt[0],popt[1],popt[2]))
 #         print('Popt {}'.format(popt))
 #         print('Pcov {}'.format(pcov))
 #         print('pcov.shape {}'.format(pcov.shape))

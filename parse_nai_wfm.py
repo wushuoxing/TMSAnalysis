@@ -22,14 +22,16 @@ def ParseNaIWfm( raw_waveform, save_waveform=False ):
   if save_waveform:
      reduced_data['Data'] = raw_waveform
 
-  reduced_data['Baseline'], reduced_data['Baseline RMS'] = GetBaseline( waveform )    
-  reduced_data.name = reduced_data['NaI Event']
+  reduced_data['Baseline'], reduced_data['Baseline RMS'] = GetBaseline( raw_waveform )    
+  reduced_data.name = 'NaI Event'
 
   try:
     reduced_data['Pulse Height'],\
-    reduced_data['Pulse Time'] = NaICrossCorrelationPulseFinder( waveform - thisrow['Baseline'] )
+    reduced_data['Pulse Time'] = NaICrossCorrelationPulseFinder( raw_waveform - reduced_data['Baseline'] )
   except ValueError:
       dummy=0
+
+  reduced_data['Data (BSS)'] = raw_waveform - reduced_data['Baseline']
 
   return reduced_data
     
@@ -55,8 +57,8 @@ def DoubleExpConvConstNaI(x,A,mu):
 
     # These constants will need to be fine-tuned for the new digitizer
 
-    t1 = 3.232
-    t2 = 25.22
+    t1 = 3.0
+    t2 = 30.0
     mask = (x-mu)<0
     y = A/(t1-t2)*( np.exp(-(x-mu)/t1) - np.exp(-(x-mu)/t2) )
     y[mask] = np.zeros(len(y))[mask]
@@ -66,7 +68,7 @@ def DoubleExpConvConstNaI(x,A,mu):
 def NaICrossCorrelation(x,y):
     cross_cor = np.zeros(len(y))
     for i in range(0,len(y)):
-        cross_cor[i] = np.sum( DoubleExpConvConstNaI(x,1.,float(i))*y )
+        cross_cor[i] = np.sum( DoubleExpConvConstNaI(x,-1.,float(i))*y )
 
     return cross_cor*1.654311 # Empirical scaling factor so that the cross correlation 
                               # height equals the true pulse height in ADC counts.
@@ -99,7 +101,7 @@ def NaICrossCorrelationPulseFinder( data ):
                                             x[start:end],\
                                             cross_cor[start:end],\
                                             p0=(pulse_heights[0],pulse_idxs[0],10.) )
-    return Afit, mufit
+    return Afit, mufit, cross_cor
     
     
 #######################################################################################
