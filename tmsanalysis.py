@@ -27,7 +27,7 @@ if '6.1.0' in root_version or '6.04/06' in root_version:
     print("Found ROOT 6")
     isROOT6 = True
 
-whichDetector = raw_input('Which detector? 1 for PSD, 2 for wire array, 3 for NaI')
+whichDetector = raw_input('Which detector? 1 for PSD, 2 for wire array, 3 for NaI: ')
 
 def print_fit_info(fit_result, fit_duration):
         

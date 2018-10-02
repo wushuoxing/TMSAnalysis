@@ -31,7 +31,7 @@ def ParseNaIWfm( raw_waveform, save_waveform=False ):
   except ValueError:
       dummy=0
 
-  reduced_data['Data (BSS)'] = raw_waveform - reduced_data['Baseline']
+#  reduced_data['Data (BSS)'] = raw_waveform - reduced_data['Baseline']
 
   return reduced_data
     
@@ -71,7 +71,7 @@ def NaICrossCorrelation(x,y):
     trigger_position = 2000
     
 
-    for i in range(trigger_position-700,trigger_position+700):
+    for i in range(trigger_position-300,trigger_position+300):
         cross_cor[i] = np.sum( DoubleExpConvConstNaI(x,-1.,float(i))*y )
 
     return cross_cor*1.654311 # Empirical scaling factor so that the cross correlation 
