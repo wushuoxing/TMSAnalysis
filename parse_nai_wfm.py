@@ -110,7 +110,7 @@ def NaICrossCorrelationPulseFinder( data ):
     
 #######################################################################################
 def FindLocalMaxima(data):
-    mask = data>10.
+    mask = data>15.
     local_maxima = np.array([])
     values = np.array([])
     for i in range(1,len(data)-1):
