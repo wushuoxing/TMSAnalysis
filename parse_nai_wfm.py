@@ -67,7 +67,11 @@ def DoubleExpConvConstNaI(x,A,mu):
 #######################################################################################
 def NaICrossCorrelation(x,y):
     cross_cor = np.zeros(len(y))
-    for i in range(0,len(y)):
+
+    trigger_position = 2000
+    
+
+    for i in range(trigger_position-700,trigger_position+700):
         cross_cor[i] = np.sum( DoubleExpConvConstNaI(x,-1.,float(i))*y )
 
     return cross_cor*1.654311 # Empirical scaling factor so that the cross correlation 
@@ -101,12 +105,12 @@ def NaICrossCorrelationPulseFinder( data ):
                                             x[start:end],\
                                             cross_cor[start:end],\
                                             p0=(pulse_heights[0],pulse_idxs[0],10.) )
-    return Afit, mufit, cross_cor
+    return Afit, mufit
     
     
 #######################################################################################
 def FindLocalMaxima(data):
-    mask = data>3.5
+    mask = data>10.
     local_maxima = np.array([])
     values = np.array([])
     for i in range(1,len(data)-1):
