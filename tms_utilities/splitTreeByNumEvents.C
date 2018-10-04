@@ -1,6 +1,15 @@
+//#include "TTree.h"
+//#include "TFile.h"
+//#include "NGMHit.h"
+//#include <cstdio>
+//#include <sstream>
+
+//int main() {
 {
+  printf("Infile name stream...\n");
 
   int num_channels = 16;
+  int num_evts_per_file = 10000;
 
   stringstream infile_name_stream;
   infile_name_stream << "/farmshare/user_data/blenardo/struck_data/"
@@ -13,29 +22,39 @@
   string infile_name = infile_name_stream.str();
   string outfile_name_template = outfile_name_template_stream.str();
 
+  printf("Opening infile...\n");
   TFile * f = new TFile( infile_name.c_str() );
 
-  
+  printf("Getting tree..\n");
   TTree * hit_tree = (TTree *)f->Get("HitTree");  
   NGMHitv8 * hit = new NGMHitv8();
 
+  printf("Setting HitTree branch address...\n");
   hit_tree->SetBranchAddress("HitTree",&hit);
 
 
-  printf("Number of entries: %d\n",hit_tree->GetEntries());
-  printf("This means there are %d events\n",hit_tree->GetEntries()/num_channels);
+  printf("Number of entries: %d\n",(int) hit_tree->GetEntries());
+  printf("This means there are %d events\n",(int) hit_tree->GetEntries()/num_channels);
 
-  n_entries = hit_tree->GetEntries();
+  int n_entries = hit_tree->GetEntries();
+
+  int n_entries_to_process = n_entries;
+//  int n_entries_to_process = (num_evts_per_file*num_channels)*5;
 
   int i_entry = 0;
   int i_outfile = 0;
-  char outfilename[100];
+  char outfilename[1000];
+  TFile * out_file;
+  TTree * out_hit_tree;
 
-  while( i_entry < n_entries ) {
-          
+
+  while( i_entry < n_entries_to_process ) {
+ 
+       printf("%d\n",i_entry);         
+ 
        sprintf(outfilename,"%s%04d.root",outfile_name_template.c_str(),i_outfile);
-       TFile * out_file = new TFile(outfilename,"RECREATE");
-       TTree * out_hit_tree = new TTree();
+       out_file = new TFile(outfilename,"RECREATE");
+       out_hit_tree = new TTree();
 
        out_hit_tree->Branch("HitTree",&hit);
        out_hit_tree->SetName("HitTree");     
@@ -43,7 +62,8 @@
        int j_entry_out = 0;
        printf("============================= OUTFILE %d ================================\n",i_outfile);
        printf("%s\n",outfilename); 
-       while( j_entry_out < 10000 && i_entry + j_entry_out < n_entries ) {
+       //while( j_entry_out < (num_evts_per_file*num_channels) && (i_entry + j_entry_out) < n_entries ) {
+       while( j_entry_out < (num_evts_per_file*num_channels) && i_entry < n_entries_to_process ) {
           hit_tree->GetEntry(i_entry);
           out_hit_tree->Fill(); 
           j_entry_out += 1;
@@ -54,8 +74,9 @@
        out_file->Close();
        delete out_hit_tree;
        delete out_file;
-       i_entry += 1;
+       //i_entry += 1;
        i_outfile += 1;
   }
 
+//return 0;
 }

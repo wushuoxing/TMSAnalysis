@@ -27,7 +27,7 @@ if '6.1.0' in root_version or '6.04/06' in root_version:
     print("Found ROOT 6")
     isROOT6 = True
 
-whichDetector = raw_input('Which detector? 1 for PSD, 2 for wire array, 3 for NaI: ')
+whichDetector = 4 #raw_input('Which detector? 1 for PSD, 2 for wire array, 3 for NaI, 4 for AmBe test: ')
 
 def print_fit_info(fit_result, fit_duration):
         
@@ -83,15 +83,28 @@ def GetChannelTypeMapNaI():
 
   return channel_type_map
 ########################################################################
+def GetChannelTypeMapAmBeTest():
+  num_channels=16
+  channel_type_map = ['empty' for i in range(0,num_channels)]
+  channel_type_map[1] = 'PSD'
+  channel_type_map[0] = 'NaI'
+  return channel_type_map
+
+########################################################################
 def ProcessFile( filename, num_events = -1, save_waveforms = False):
 
+    outfilename = filename.split('.')[0] + '.pkl'
+    print(outfilename)
+
     #print "processing file: ", filename
-    if whichDetector == '1':
-      channel_type_map = GetChannelTypeMapPSD()
-    if whichDetector == '2':
-      channel_type_map = GetChannelTypeMap()
-    if whichDetector == '3':
-      channel_type_map = GetChannelTypeMapNaI()
+    #if whichDetector == '1':
+    #  channel_type_map = GetChannelTypeMapPSD()
+    #if whichDetector == '2':
+    #  channel_type_map = GetChannelTypeMap()
+    #if whichDetector == '3':
+    #  channel_type_map = GetChannelTypeMapNaI()
+    #if whichDetector == '4':
+    channel_type_map = GetChannelTypeMapAmBeTest()
 
     #channel_type_map = GetChannelTypeMap()
     num_channels = len(channel_type_map)
@@ -112,6 +125,7 @@ def ProcessFile( filename, num_events = -1, save_waveforms = False):
     num_records_to_process = num_events * num_channels
     if num_records_to_process > n_entries or num_events < 0:
        num_records_to_process = n_entries
+       num_events = n_entries/num_channels
 
     output_dataframe = pd.DataFrame()
 
@@ -119,7 +133,8 @@ def ProcessFile( filename, num_events = -1, save_waveforms = False):
     i_event = 0
     while i_event < num_events:
     #for i_entry in xrange(n_entries):
-        print('Processing event {}'.format(i_event))
+        if i_event % 1000 == 0:
+          print('Processing event {}'.format(i_event))
         if( i_entry % num_channels == 0 ):
             ch_x_array = []
             energy_x_array = []
@@ -200,7 +215,7 @@ def ProcessFile( filename, num_events = -1, save_waveforms = False):
 
     #outfile=ROOT.TFile(outfilename,"RECREATE")
 
-    output_dataframe.to_pickle('tms_nai_output_test.pkl')
+    output_dataframe.to_pickle(outfilename)
     return output_dataframe
 
 
