@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.special import erf
 
 ###########################################################################
 def TwoExpConv(x,A,mu,t1,t2):

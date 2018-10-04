@@ -2,29 +2,13 @@ import pandas as pd
 import numpy as np
 from scipy import optimize as opt
 from tms_utilities.useful_function_shapes import GumbelDist
+from tms_utilities.useful_function_shapes import DoubleExpGaussConv 
 
 
 ########################################################################################
 def ParsePSDWfm( raw_waveform, save_waveform=False ):
  
   isNewEvent = True  
-
-  colnames = [\
-             'Baseline',\
-             'Baseline RMS',\
-#             'Data',\
-             'Pulse Area',\
-             'Pulse Height',\
-             'Fit Amplitude',\
-             'Fit Time',\
-             'Fit Width',\
-             'PSD8',\
-             'PSD9',\
-             'PSD10',\
-             'PSD11']
-             
-  if save_waveform:
-     colnames.append('Data')
 
   reduced_data = pd.Series()
 
@@ -38,8 +22,11 @@ def ParsePSDWfm( raw_waveform, save_waveform=False ):
   reduced_data['Pulse Height'],\
   reduced_data['Pulse Area'],\
   reduced_data['Fit Amplitude'],\
+  reduced_data['Fit Frac'],\
   reduced_data['Fit Time'],\
-  reduced_data['Fit Width'],\
+  reduced_data['Fit Sig'],\
+  reduced_data['Fit T1'],\
+  reduced_data['Fit T2'],\
   reduced_data['PSD8'],\
   reduced_data['PSD9'],\
   reduced_data['PSD10'],\
@@ -63,8 +50,6 @@ def GetBaseline( data ):
 ########################################################################################
 def FindPulseAndComputeArea( data ):
 
-  seconds_per_sample = 1.e-8
-
   baseline, baselineRMS = GetBaseline( data )
   
   threshold = 8*baselineRMS # 8-sigma threshold hardcoded in
@@ -72,12 +57,12 @@ def FindPulseAndComputeArea( data ):
   post_nsamps = 95
   
   pulse_idx = np.where( (data - baseline)**2 > (threshold)**2 )
-  if len(pulse_idx[0]) == 0: return 0,0,0,0,0,0,0,0,0
+  if len(pulse_idx[0]) == 0: return 0,0,0,0,0,0,0,0,0,0,0,0
   #print('Pulse array {}'.format(pulse_idx[0]) ) 
   #print('pulse_idx[0][-1] = {}, pulse_idx[0][0] = {}'.format(pulse_idx[0][-1],pulse_idx[0][0]))
   if (pulse_idx[0][-1] - pulse_idx[0][0])>(len(pulse_idx[0])-1 + pre_nsamps + post_nsamps):
      print('Multiple pulses found in event. Skipping...')
-     return 0,0,0,0,0,0,0,0,0
+     return 0,0,0,0,0,0,0,0,0,0,0,0
 
   first_pulse = pulse_idx[0]
   start = first_pulse[0]-pre_nsamps
@@ -92,7 +77,7 @@ def FindPulseAndComputeArea( data ):
   pulse_area = np.sqrt( np.sum( pulse_data )**2 )
   pulse_height = np.sqrt( np.max( pulse_data**2 ) )
   pulse_max_index = np.argmax( (data-baseline)**2 )
-  dat = -(data - np.mean(data[0:50]))
+  dat = (data - np.mean(data[0:50]))
   pulse_area, aft_05 = GetPulseArea( dat )
   x = np.linspace(0.,len(dat)-1,len(dat)) - aft_05
   i9 = np.where( x == 9. )
@@ -104,17 +89,25 @@ def FindPulseAndComputeArea( data ):
   psd10 = (np.cumsum(dat)/pulse_area)[i10][0]
   psd11 = (np.cumsum(dat)/pulse_area)[i11][0]
 
+  # Initial guesses (based on high resolution scope traces)
+  fit_A_0 = pulse_height*3.
+  fit_B_0 = 0.8
+  fit_mu_0 = pulse_max_index
+  fit_sig_0 = 0.325
+  fit_t1_0 = 0.75 # samples
+  fit_t2_0 = 8. # samples
+
   try: 
-    (fit_amp, fit_time, fit_width), _ = opt.curve_fit( GumbelDist,\
+    (fit_A, fit_B, fit_mu, fit_sig, fit_t1, fit_t2), _ = opt.curve_fit( DoubleExpGaussConv,\
                                          np.linspace(start,end-1,(end-start)),\
                                          pulse_data,\
-                                         p0=(pulse_height*(-1.),pulse_max_index,1.))
+                                         p0=(fit_A_0,fit_B_0,fit_mu_0,fit_sig_0,fit_t1_0,fit_t2_0))
   except:
     print('Fit error.')
-    return 0,0,0,0,0,0,0,0,0
+    return 0,0,0,0,0,0,0,0,0,0,0,0
 
 
-  return pulse_height, pulse_area, fit_amp, fit_time, fit_width, psd8, psd9, psd10, psd11
+  return pulse_height, pulse_area, fit_A, fit_B, fit_mu, fit_sig, fit_t1, fit_t2, psd8, psd9, psd10, psd11
 
 #######################################################################################
 def GetPulseArea( data ):
