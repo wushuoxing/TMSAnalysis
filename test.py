@@ -2,9 +2,9 @@ import tmsanalysis as tms
 import pandas as pd
 import time
 
-datadir = '~/software/charge-readout-scripts/struck/ngm/'
+datadir = '/farmshare/user_data/blenardo/struck_data/'
 #filename = 'tier1_SIS3316Raw_20180925171528_Cs137_PSDScintTest_TriggThroughDisc_62_5MHz_1-ngm.root'
-filename = 'tier1_SIS3316Raw_20181002001833_NaI_1700V_Cs137_10mVTh_ch2_125MHz__1-ngm.root'
+filename = 'tier1_SIS3316Raw_20181001221826_NaI_1700V_Co_10mVTh_ch1_125MHz__1-ngm.root'
 datafile = datadir + filename
 
 start_time = time.time()
