@@ -9,7 +9,7 @@ import sys
 
 datadir = '/farmshare/user_data/blenardo/struck_data/'
 #filename = 'tier1_SIS3316Raw_20180925171528_Cs137_PSDScintTest_TriggThroughDisc_62_5MHz_1-ngm.root'
-filename = sys.argv[1] + '/' + sys.argv[1] + '_{:04d}.root'.format( int(sys.argv[2]) )
+filename = sys.argv[1] + '/' + sys.argv[2] #+ '_{:04d}.root'.format( int(sys.argv[2]) )
 datafile = datadir + filename
 print('================================================================')
 print('Opening file...')

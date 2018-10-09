@@ -90,6 +90,29 @@ def GetChannelTypeMapAmBeTest():
   channel_type_map[0] = 'NaI'
   return channel_type_map
 
+def GetChannelTypeMapAmBeCoincidence():
+  num_channels=18
+  channel_type_map[1]  = 'Xwire'
+  channel_type_map[0]  = 'Xwire'
+  channel_type_map[3]  = 'Xwire'
+  channel_type_map[2]  = 'Xwire'
+  channel_type_map[5]  = 'Xwire'
+  channel_type_map[4]  = 'Xwire'
+  channel_type_map[7]  = 'Xwire'
+  channel_type_map[6]  = 'Xwire'
+  channel_type_map[9]  = 'Ywire'
+  channel_type_map[8]  = 'Ywire'
+  channel_type_map[11] = 'Ywire'
+  channel_type_map[10] = 'Ywire'
+  channel_type_map[13] = 'Ywire'
+  channel_type_map[12] = 'Ywire'
+  channel_type_map[15] = 'Ywire'
+  channel_type_map[14] = 'Ywire'
+  channel_type_map[17] = 'PSD'
+  channel_type_map[16] = 'NaI'
+
+
+
 ########################################################################
 def ProcessFile( filename, num_events = -1, save_waveforms = False):
 
@@ -104,7 +127,7 @@ def ProcessFile( filename, num_events = -1, save_waveforms = False):
     #if whichDetector == '3':
     #  channel_type_map = GetChannelTypeMapNaI()
     #if whichDetector == '4':
-    channel_type_map = GetChannelTypeMapAmBeTest()
+    channel_type_map = GetChannelTypeMapAmBeCoincidence()
 
     #channel_type_map = GetChannelTypeMap()
     num_channels = len(channel_type_map)
@@ -146,13 +169,23 @@ def ProcessFile( filename, num_events = -1, save_waveforms = False):
  
         #tree.GetEntry(i_entry)
         output_series = pd.Series()
+        this_event_timestamp = 0
+        is_good_event = True
  
         for i_channel in xrange(num_channels):
             tree.GetEntry(i_entry)
 
             slot_num = tree.HitTree.GetSlot()
-            ch_num =  tree.HitTree.GetChannel()
+            ch_num =  tree.HitTree.GetChannel() + slot_num*16
             gate_size = tree.HitTree.GetGateCount()
+
+            if i_channel == 0: this_event_timestamp = tree.HitTree.GetRawClock()
+            if tree.HitTree.GetRawClock() != this_event_timestamp:
+               is_good_event = False
+               print('Incomplete event! Entry: {}'.format(i_entry))
+               break
+            else:
+               is_good_event = True
 
             #print('entry {}, channel {}'.format(i_entry, ch_num))
 
@@ -201,8 +234,8 @@ def ProcessFile( filename, num_events = -1, save_waveforms = False):
 
 
             i_entry += 1
-
-        output_dataframe = output_dataframe.append( output_series, ignore_index=True )
+        if is_good_event:
+          output_dataframe = output_dataframe.append( output_series, ignore_index=True )
         i_event += 1   
         if i_entry >= num_records_to_process:
            break
