@@ -30,8 +30,8 @@ def ParseTMSXwireWfm( raw_waveform, save_waveform = False ):
         #graph_fftcut.SetPoint(isamp,x,channel_wfm_lp[isamp])
         graph_fftcut.SetPoint(isamp,x,channel_wfm_fft_hp_lp[isamp])
 
-    noise_wfm = np.array([graph_fftcut.GetY()[isamp] for isamp in xrange(700,1700,1)])
-    signal_wfm = np.array([graph_fftcut.GetY()[isamp] for isamp in xrange(2000,2400,1)])
+    noise_wfm = np.array([graph_fftcut.GetY()[isamp] for isamp in xrange(0,200,1)])
+    signal_wfm = np.array([graph_fftcut.GetY()[isamp] for isamp in xrange(200,800,1)])
 
     noise_baseline = np.mean(noise_wfm)
     noise_rms=np.sqrt(noise_wfm.dot(noise_wfm)/noise_wfm.size)
@@ -41,12 +41,12 @@ def ParseTMSXwireWfm( raw_waveform, save_waveform = False ):
     # fit_init is a tuple 
     fit_init_list = list()
     fit_init_list.append( 1. )             # integral
-    fit_init_list.append( float(2000.0) )  # starting time
+    fit_init_list.append( float(300.0) )  # starting time
     #fit_init_list.append( float(125.*1) )  # differential time
     #fit_init_list.append( float(31.25*2))  # integration time
     fit_init_list.append( noise_baseline)  # noise floor
 
-    if (signal_amp-noise_baseline)>4*noise_rms and (np.argmax(signal_wfm)+2000)>2000 :
+    if (signal_amp-noise_baseline)>4*noise_rms and (np.argmax(signal_wfm)+300)>300 :
 
          #fitFunc.SetParameter(0,np.max(signal_wfm)*100)
 
@@ -56,8 +56,8 @@ def ParseTMSXwireWfm( raw_waveform, save_waveform = False ):
          #                                fit_init_list[1],\
          #                                fit_init_list[2]))
 
-         fit_start = 1600#np.argmax(signal_wfm)+2000-150
-         fit_end   = 4000#np.argmax(signal_wfm)+2000+400
+         fit_start = 200#np.argmax(signal_wfm)+2000-150
+         fit_end   = 900#np.argmax(signal_wfm)+2000+400
 
          fit_mask = range(fit_start,fit_end+1)
          
@@ -92,8 +92,8 @@ def ParseTMSXwireWfm( raw_waveform, save_waveform = False ):
          deltaT=0.1*(popt[2]-np.min(y_from_fit))*60
          startT= popt[1]
 
-         if(startT>2000) and (startT-2000)*0.052<20 and redChi2 <5 :
-                output_series['Drift'] = (startT-2000)*0.052
+         if(startT>300) and (startT-300)*0.052<20 and redChi2 <5 :
+                output_series['Drift'] = (startT-300)*0.052
                 output_series['Energy'] = signal_amp
                 output_series['Drift Err'] = perr[1]*0.052
                 output_series['Fit RedChi2'] = redChi2
@@ -133,8 +133,8 @@ def ParseTMSYwireWfm( raw_waveform, save_waveform=False ):
         #graph_fftcut.SetPoint(isamp,x,channel_wfm_lp[isamp])
         graph_fftcut.SetPoint(isamp,x,channel_wfm_fft_hp_lp[isamp])
 
-    noise_wfm = np.array([graph_fftcut.GetY()[isamp] for isamp in xrange(700,1700,1)])
-    signal_wfm = np.array([graph_fftcut.GetY()[isamp] for isamp in xrange(2000,2400,1)])
+    noise_wfm = np.array([graph_fftcut.GetY()[isamp] for isamp in xrange(0,200,1)])
+    signal_wfm = np.array([graph_fftcut.GetY()[isamp] for isamp in xrange(200,900,1)])
 
     noise_baseline = np.mean(noise_wfm)
     noise_rms=np.sqrt(noise_wfm.dot(noise_wfm)/noise_wfm.size)
@@ -144,12 +144,12 @@ def ParseTMSYwireWfm( raw_waveform, save_waveform=False ):
     # fit_init is a tuple 
     fit_init_list = list()
     fit_init_list.append( 1. )             # integral
-    fit_init_list.append( float(2000.0) )  # starting time
+    fit_init_list.append( float(300.0) )  # starting time
     #fit_init_list.append( float(125.*1) )  # differential time
     #fit_init_list.append( float(31.25*2))  # integration time
     fit_init_list.append( noise_baseline)  # noise floor
 
-    if (noise_baseline - signal_amp)>3*noise_rms and (np.argmin(signal_wfm)+2000)>2000 :
+    if (noise_baseline - signal_amp)>3*noise_rms and (np.argmin(signal_wfm)+300)>300 :
 
          #fitFunc.SetParameter(0,np.max(signal_wfm)*100)
 
@@ -159,8 +159,8 @@ def ParseTMSYwireWfm( raw_waveform, save_waveform=False ):
          #                                fit_init_list[1],\
          #                                fit_init_list[2]))
 
-         fit_start = 1600#np.argmax(signal_wfm)+2000-150
-         fit_end   = 4000#np.argmax(signal_wfm)+2000+400
+         fit_start = 200#np.argmax(signal_wfm)+2000-150
+         fit_end   = 900#np.argmax(signal_wfm)+2000+400
 
          fit_mask = range(fit_start,fit_end+1)
          
@@ -195,8 +195,8 @@ def ParseTMSYwireWfm( raw_waveform, save_waveform=False ):
          deltaT=0.1*(popt[2]-np.min(y_from_fit))*60
          startT= popt[1]
 
-         if(startT>2000) and (startT-2000)*0.052<20 and redChi2 <5 :
-                output_series['Drift'] = (startT-2000)*0.052
+         if(startT>300) and (startT-300)*0.052<20 and redChi2 <5 :
+                output_series['Drift'] = (startT-300)*0.052
                 output_series['Energy'] = signal_amp
                 output_series['Drift Err'] = perr[1]*0.052
                 output_series['Fit RedChi2'] = redChi2

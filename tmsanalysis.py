@@ -91,7 +91,8 @@ def GetChannelTypeMapAmBeTest():
   return channel_type_map
 
 def GetChannelTypeMapAmBeCoincidence():
-  num_channels=18
+  num_channels=32
+  channel_type_map = ['empty' for i in range(0,num_channels)]
   channel_type_map[1]  = 'Xwire'
   channel_type_map[0]  = 'Xwire'
   channel_type_map[3]  = 'Xwire'
@@ -110,7 +111,7 @@ def GetChannelTypeMapAmBeCoincidence():
   channel_type_map[14] = 'Ywire'
   channel_type_map[17] = 'PSD'
   channel_type_map[16] = 'NaI'
-
+  return channel_type_map
 
 
 ########################################################################
@@ -156,7 +157,7 @@ def ProcessFile( filename, num_events = -1, save_waveforms = False):
     i_event = 0
     while i_event < num_events:
     #for i_entry in xrange(n_entries):
-        if i_event % 1000 == 0:
+        if i_event % 1 == 0:
           print('Processing event {}'.format(i_event))
         if( i_entry % num_channels == 0 ):
             ch_x_array = []

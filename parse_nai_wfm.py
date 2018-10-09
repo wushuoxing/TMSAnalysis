@@ -7,16 +7,6 @@ from tms_utilities.useful_function_shapes import Gaussian
 ########################################################################################
 def ParseNaIWfm( raw_waveform, save_waveform=False ):
  
-  colnames = [\
-             'Baseline',\
-             'Baseline RMS',\
-#             'Pulse Area',\
-             'Pulse Height',\
-             'Pulse Time']
-             
-  if save_waveform:
-     colnames.append('Data')
-
   reduced_data = pd.Series()
 
   if save_waveform:
@@ -27,9 +17,11 @@ def ParseNaIWfm( raw_waveform, save_waveform=False ):
 
   try:
     reduced_data['Pulse Height'],\
-    reduced_data['Pulse Time'] = NaICrossCorrelationPulseFinder( raw_waveform - reduced_data['Baseline'] )
-  except ValueError:
-      dummy=0
+    reduced_data['Pulse Time']  = NaICrossCorrelationPulseFinder( raw_waveform - reduced_data['Baseline'] )
+  except ValueError as e:
+    print(e)
+    reduced_data['Pulse Height'] = float('nan')
+    reduced_data['Pulse Time'] = float('nan')
 
 #  reduced_data['Data (BSS)'] = raw_waveform - reduced_data['Baseline']
 
@@ -65,13 +57,11 @@ def DoubleExpConvConstNaI(x,A,mu):
     return y
 
 #######################################################################################
-def NaICrossCorrelation(x,y):
+def NaICrossCorrelation( x, y, trigger_position, cc_window):
     cross_cor = np.zeros(len(y))
-
-    trigger_position = 2000
     
 
-    for i in range(0,len(x)):
+    for i in range(trigger_position-cc_window,trigger_position+cc_window):
         cross_cor[i] = np.sum( DoubleExpConvConstNaI(x,-1.,float(i))*y )
 
     return cross_cor*1.654311 # Empirical scaling factor so that the cross correlation 
@@ -80,40 +70,57 @@ def NaICrossCorrelation(x,y):
 #######################################################################################
 def NaICrossCorrelationPulseFinder( data ):
 
+    trigger_position = 300 # sample number of trigger within waveform
+    cc_window = 250 # number of samples on either side of trigger to include in cross-correlation
+    cut_window = 100 # number of samples on either side of trigger to search for pulses
+
     x = np.linspace(0.,len(data)-1.,len(data))
     y = data               
 
-    cross_cor = NaICrossCorrelation(x,y)
+    cross_cor = NaICrossCorrelation( x, y, trigger_position, cc_window)
     pulse_heights = np.array([])                
     pulse_times = np.array([])
     pulse_idxs = np.array([])
     
-    pulse_idxs, pulse_heights = FindLocalMaxima( cross_cor )
+    pulse_idxs, pulse_heights = FindLocalMaxima( cross_cor, trigger_position, cc_window )
+    #print('Pulse idxs: {}'.format(pulse_idxs))
+    cut = (pulse_idxs-cc_window)**2 < cut_window**2
+    #print('Cut: {}'.format(cut))
+    pulse_heights = pulse_heights[ cut ]
+    pulse_idxs = pulse_idxs[ cut ]
+    #print('Pulse idxs: {}'.format(pulse_idxs))
     
+ 
     if len(pulse_idxs) > 1:
           #print('Pulse indexes: {}'.format(pulse_idxs))
-          raise ValueError('Multiple pulses found in event. Skipping...')
+          print('Multiple pulses found in event. Skipping...')
           return  0,0
     if len(pulse_idxs) == 0:
         raise ValueError('No pulses found in event')
         return 0,0
         
-    start = int(pulse_idxs[0]) - 1
+    start = int(pulse_idxs[0]) - 2
     end = int(pulse_idxs[0]) + 4
-    
-    (Afit, mufit, sigfit),_ = opt.curve_fit( Gaussian,\
-                                            x[start:end],\
-                                            cross_cor[start:end],\
-                                            p0=(pulse_heights[0],pulse_idxs[0],10.) )
+    try:     
+      (Afit, mufit, sigfit),_ = opt.curve_fit( Gaussian,\
+                                              x[start:end],\
+                                              cross_cor[start:end],\
+                                              p0=(pulse_heights[0],pulse_idxs[0],11.) )
+    except RuntimeError as e:
+      print(e)
+      Afit = 0.
+      mufit = 0.
+      sigfit = 0.
+
     return Afit, mufit
     
     
 #######################################################################################
-def FindLocalMaxima(data):
+def FindLocalMaxima(data, trigger_position, cc_window):
     mask = data>15.
     local_maxima = np.array([])
     values = np.array([])
-    for i in range(1,len(data)-1):
+    for i in range(trigger_position - cc_window,trigger_position + cc_window):
         if data[i] > data[i-1] and data[i] > data[i+1] and mask[i]:
             local_maxima = np.append(local_maxima,i)
             values = np.append(values,data[i])
