@@ -157,7 +157,7 @@ def ProcessFile( filename, num_events = -1, save_waveforms = False):
     i_event = 0
     while i_event < num_events:
     #for i_entry in xrange(n_entries):
-        if i_event % 1 == 0:
+        if i_event % 500 == 0:
           print('Processing event {}'.format(i_event))
         if( i_entry % num_channels == 0 ):
             ch_x_array = []
