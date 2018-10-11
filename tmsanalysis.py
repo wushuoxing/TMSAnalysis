@@ -117,8 +117,10 @@ def GetChannelTypeMapAmBeCoincidence():
 ########################################################################
 def ProcessFile( filename, num_events = -1, save_waveforms = False):
 
-    outfilename = filename.split('.')[0] + '.pkl'
+    outfilename = filename.split('.')[0] + '_2.pkl'
     print(outfilename)
+
+    file_id = filename.split('_')[2]
 
     #print "processing file: ", filename
     #if whichDetector == '1':
@@ -168,10 +170,14 @@ def ProcessFile( filename, num_events = -1, save_waveforms = False):
             time_y_array = []
             time_err_y_array = []
  
-        #tree.GetEntry(i_entry)
         output_series = pd.Series()
+        output_series['File ID'] = file_id
+        output_series['Event ID'] = i_event
+
         this_event_timestamp = 0
         is_good_event = True
+
+
  
         for i_channel in xrange(num_channels):
             tree.GetEntry(i_entry)
