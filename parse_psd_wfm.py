@@ -55,7 +55,7 @@ def FindPulseAndComputeArea( data ):
   
   threshold = 8*baselineRMS # 8-sigma threshold hardcoded in
   pre_nsamps = 10
-  post_nsamps = 95
+  post_nsamps = 250
   
   pulse_idx = np.where( (data - baseline)**2 > (threshold)**2 )
   if len(pulse_idx[0]) == 0: return 0,0,0,0,0,0,0,0,0,0,0,0
@@ -75,20 +75,19 @@ def FindPulseAndComputeArea( data ):
   pulse_data = data[start:end] - baseline
   #print('Length of pulse_data: {}'.format(len(pulse_data)))
 
-  pulse_area = np.sqrt( np.sum( pulse_data )**2 )
+  #pulse_area = np.sqrt( np.sum( pulse_data )**2 )
   pulse_height = np.sqrt( np.max( pulse_data**2 ) )
   pulse_max_index = np.argmax( (data-baseline)**2 )
-  dat = (data - np.mean(data[0:50]))
-  pulse_area, aft_05 = GetPulseArea( dat )
-  x = np.linspace(0.,len(dat)-1,len(dat)) - aft_05
+  pulse_area, aft_05 = GetPulseArea( pulse_data )
+  x = np.linspace(start,end,end-start) - (aft_05 + start)
   i9 = np.where( x == 9. )
   i8 = np.where( x == 8. )
   i10 = np.where( x == 10. )
   i11 = np.where( x == 11. )
-  psd8 = (np.cumsum(dat)/pulse_area)[i8][0]
-  psd9 = (np.cumsum(dat)/pulse_area)[i9][0]
-  psd10 = (np.cumsum(dat)/pulse_area)[i10][0]
-  psd11 = (np.cumsum(dat)/pulse_area)[i11][0]
+  psd8 = (np.cumsum(pulse_data)/pulse_area)[i8][0]
+  psd9 = (np.cumsum(pulse_data)/pulse_area)[i9][0]
+  psd10 = (np.cumsum(pulse_data)/pulse_area)[i10][0]
+  psd11 = (np.cumsum(pulse_data)/pulse_area)[i11][0]
 
   # Initial guesses (based on high resolution scope traces)
   fit_A_0 = pulse_height*3.
@@ -120,15 +119,15 @@ def FindPulseAndComputeArea( data ):
 #######################################################################################
 def GetPulseArea( data ):
     if len(data) == 0: return 0,0
-    peakidx = np.argmax(data)
-    if peakidx-5 < 0 or peakidx+95 > len(data): return 0,0
-    pulse = data[peakidx-5:peakidx+95]
+#    peakidx = np.argmax(data)
+#    if peakidx-10 < 0 or peakidx+250 > len(data): return 0,0
+#    pulse = data[peakidx-10:peakidx+250]
     cumul_pulse = np.cumsum(pulse)
     pulse_area = cumul_pulse[-1]
     t0s = np.where( cumul_pulse > 0.1*pulse_area)[0][0]
     #print('t0s = {}'.format(t0s))
-    m = cumul_pulse[t0s]-cumul_pulse[t0s-1]
-    b = cumul_pulse[t0s] - m*t0s
+    #m = cumul_pulse[t0s]-cumul_pulse[t0s-1]
+    #b = cumul_pulse[t0s] - m*t0s
     aft_05 = t0s + (peakidx-10) #+ ( 0.05*pulse_area - b)/m
     #print(pulse_area)
     #print(aft_05)
