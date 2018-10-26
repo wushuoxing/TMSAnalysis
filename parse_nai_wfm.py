@@ -70,7 +70,7 @@ def NaICrossCorrelation( x, y, trigger_position, cc_window):
 #######################################################################################
 def NaICrossCorrelationPulseFinder( data ):
 
-    trigger_position = 300 # sample number of trigger within waveform
+    trigger_position = 2000 # sample number of trigger within waveform
     cc_window = 250 # number of samples on either side of trigger to include in cross-correlation
     cut_window = 100 # number of samples on either side of trigger to search for pulses
 
@@ -83,12 +83,12 @@ def NaICrossCorrelationPulseFinder( data ):
     pulse_idxs = np.array([])
     
     pulse_idxs, pulse_heights = FindLocalMaxima( cross_cor, trigger_position, cc_window )
-    #print('Pulse idxs: {}'.format(pulse_idxs))
-    cut = (pulse_idxs-cc_window)**2 < cut_window**2
+    print('Pulse idxs: {}'.format(pulse_idxs))
+    cut = (pulse_idxs-trigger_position)**2 < cut_window**2
     #print('Cut: {}'.format(cut))
     pulse_heights = pulse_heights[ cut ]
     pulse_idxs = pulse_idxs[ cut ]
-    #print('Pulse idxs: {}'.format(pulse_idxs))
+    print('Pulse idxs: {}'.format(pulse_idxs))
     
  
     if len(pulse_idxs) > 1:
@@ -117,11 +117,14 @@ def NaICrossCorrelationPulseFinder( data ):
     
 #######################################################################################
 def FindLocalMaxima(data, trigger_position, cc_window):
-    mask = data>15.
+    mask = data>13.
     local_maxima = np.array([])
     values = np.array([])
     for i in range(trigger_position - cc_window,trigger_position + cc_window):
-        if data[i] > data[i-1] and data[i] > data[i+1] and mask[i]:
+        if data[i] > data[i-1] and data[i] > data[i+1] and\
+           data[i] > data[i-2] and data[i] > data[i+2] and\
+           data[i+1] > data[i+2] and data[i-1] > data[i-2] and \
+           mask[i]:
             local_maxima = np.append(local_maxima,i)
             values = np.append(values,data[i])
     return local_maxima, values     

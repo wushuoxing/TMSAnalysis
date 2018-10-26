@@ -57,3 +57,8 @@ def fitShapedConst( x, p0, p1, p4 ):
     result = p0 * fenzi/fenmu + p4
     result[x<p1] = np.ones(len(result[x<p1]))*p4
     return result
+
+###########################################################################
+def DoubleExpGaussConvTFixed(x,A,B,mu,sig):
+    return DoubleExpGaussConv(x,A,B,mu,sig,0.918,14.2)
+

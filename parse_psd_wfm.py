@@ -3,6 +3,7 @@ import numpy as np
 from scipy import optimize as opt
 from tms_utilities.useful_function_shapes import GumbelDist
 from tms_utilities.useful_function_shapes import DoubleExpGaussConv 
+from tms_utilities.useful_function_shapes import DoubleExpGaussConvTFixed 
 
 
 ########################################################################################
@@ -97,11 +98,18 @@ def FindPulseAndComputeArea( data ):
   fit_t1_0 = 0.75 # samples
   fit_t2_0 = 8. # samples
 
+#  try: 
+#    (fit_A, fit_B, fit_mu, fit_sig, fit_t1, fit_t2), _ = opt.curve_fit( DoubleExpGaussConv,\
+#                                         np.linspace(start,end-1,(end-start)),\
+#                                         pulse_data,\
+#                                         p0=(fit_A_0,fit_B_0,fit_mu_0,fit_sig_0,fit_t1_0,fit_t2_0))
   try: 
-    (fit_A, fit_B, fit_mu, fit_sig, fit_t1, fit_t2), _ = opt.curve_fit( DoubleExpGaussConv,\
+    (fit_A, fit_B, fit_mu, fit_sig), _ = opt.curve_fit( DoubleExpGaussConvTFixed,\
                                          np.linspace(start,end-1,(end-start)),\
                                          pulse_data,\
-                                         p0=(fit_A_0,fit_B_0,fit_mu_0,fit_sig_0,fit_t1_0,fit_t2_0))
+                                         p0=(fit_A_0,fit_B_0,fit_mu_0,fit_sig_0))
+    fit_t1 = 0.918
+    fit_t2 = 14.2
   except:
     print('Fit error.')
     return 0,0,0,0,0,0,0,0,0,0,0,0
@@ -125,4 +133,6 @@ def GetPulseArea( data ):
     #print(pulse_area)
     #print(aft_05)
     return pulse_area, aft_05
+
+
 
