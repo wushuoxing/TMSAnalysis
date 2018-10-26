@@ -79,7 +79,7 @@ def FindPulseAndComputeArea( data ):
   pulse_height = np.sqrt( np.max( pulse_data**2 ) )
   pulse_max_index = np.argmax( (data-baseline)**2 )
   pulse_area, aft_05 = GetPulseArea( pulse_data )
-  x = np.linspace(start,end,end-start) - (aft_05 + start)
+  x = np.linspace(start,end-1,end-start) - (aft_05 + start)
   i9 = np.where( x == 9. )
   i8 = np.where( x == 8. )
   i10 = np.where( x == 10. )
