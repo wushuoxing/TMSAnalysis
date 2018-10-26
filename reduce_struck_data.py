@@ -15,7 +15,7 @@ print('Opening file...')
 print(filename)
 
 start_time = time.time()
-dfout = tms.ProcessFile(datadir,filename,save_waveforms=False,num_events=-1)
+dfout = tms.ProcessFile(datadir,filename,save_waveforms=False,num_events=200)
 end_time = time.time()
 
 print('Time elapsed: {}s ({} min)'.format(end_time-start_time,(end_time-start_time)/60.))

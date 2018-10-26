@@ -122,13 +122,13 @@ def GetPulseArea( data ):
 #    peakidx = np.argmax(data)
 #    if peakidx-10 < 0 or peakidx+250 > len(data): return 0,0
 #    pulse = data[peakidx-10:peakidx+250]
-    cumul_pulse = np.cumsum(pulse)
+    cumul_pulse = np.cumsum(data)
     pulse_area = cumul_pulse[-1]
-    t0s = np.where( cumul_pulse > 0.1*pulse_area)[0][0]
+    t0s = np.where( cumul_pulse > 0.05*pulse_area)[0][0]
     #print('t0s = {}'.format(t0s))
     #m = cumul_pulse[t0s]-cumul_pulse[t0s-1]
     #b = cumul_pulse[t0s] - m*t0s
-    aft_05 = t0s + (peakidx-10) #+ ( 0.05*pulse_area - b)/m
+    aft_05 = t0s #+ ( 0.05*pulse_area - b)/m
     #print(pulse_area)
     #print(aft_05)
     return pulse_area, aft_05
